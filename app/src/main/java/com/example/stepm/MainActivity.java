@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, StepListener {
     private TextView textView;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int numSteps;
     private long millisecondTime, startTime, endTime;
     private int calibratedBPM;
+    private boolean isRunning;
 
     TextView TvSteps;
     TextView tvBPM;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 TvSteps.setText(TEXT_NUM_STEPS + numSteps);
                 startTime = SystemClock.elapsedRealtime();
                 sensorManager.registerListener(MainActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
+                isRunning = true;
 
             }
         });
@@ -67,7 +70,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 endTime = SystemClock.elapsedRealtime();
                 millisecondTime = endTime - startTime;
                 calibratedBPM = (int)(numSteps / ((double)millisecondTime / 60000));
-                tvBPM.setText("BPM" + calibratedBPM);
+                if (isRunning) {
+                    tvBPM.setText("BPM" + calibratedBPM);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Start the pedometer first!", Toast.LENGTH_SHORT).show();
+                }
+                isRunning = false;
 
             }
         });
