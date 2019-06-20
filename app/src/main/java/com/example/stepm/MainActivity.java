@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,8 +18,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accel;
     private static final String TEXT_NUM_STEPS = "Number of Steps: ";
     private int numSteps;
+    private long millisecondTime, startTime, endTime;
+    private int calibratedBPM;
 
     TextView TvSteps;
+    TextView tvBPM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +37,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         simpleStepDetector.registerListener(this);
 
         TvSteps = (TextView) findViewById(R.id.tv_steps);
+        tvBPM = findViewById(R.id.bpm);
         Button BtnStart = (Button) findViewById(R.id.btn_start);
         Button BtnStop = (Button) findViewById(R.id.btn_stop);
+
 
 
 
@@ -44,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View arg0) {
 
                 numSteps = 0;
+                TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+                startTime = SystemClock.elapsedRealtime();
                 sensorManager.registerListener(MainActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
 
             }
@@ -56,6 +64,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View arg0) {
 
                 sensorManager.unregisterListener(MainActivity.this);
+                endTime = SystemClock.elapsedRealtime();
+                millisecondTime = endTime - startTime;
+                calibratedBPM = (int)(numSteps / ((double)millisecondTime / 60000));
+                tvBPM.setText("BPM" + calibratedBPM);
 
             }
         });

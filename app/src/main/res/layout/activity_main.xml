@@ -6,13 +6,11 @@
     android:layout_height="match_parent">
 
 
-
     <TextView
         android:id="@+id/tv_steps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        />
+        android:gravity="center" />
 
 
     <Button
@@ -28,5 +26,11 @@
         android:layout_height="wrap_content"
         android:text="Stop Pedometer"
         />
+
+    <TextView
+        android:id="@+id/bpm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center" />
 
 </LinearLayout>
