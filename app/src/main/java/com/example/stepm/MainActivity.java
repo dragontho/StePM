@@ -1,5 +1,6 @@
 package com.example.stepm;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,10 +10,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Handler;
+
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, StepListener {
     private TextView textView;
@@ -35,6 +39,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         final Handler handler = new Handler();
+
+        public void sendMessage(View view) {
+            Intent intent = new Intent(this, SongListActivity.class);
+            EditText editText = (EditText) findViewById(R.id.editText);
+            String message = editText.getText().toString();
+            intent.putExtra(EXTRA_MESSAGE, message);
+            startActivity(intent);
+        }
+
 
 
         // Get an instance of the SensorManager
