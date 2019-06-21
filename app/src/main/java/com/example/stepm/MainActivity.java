@@ -9,8 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, StepListener {
     private TextView textView;
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private long millisecondTime, startTime, endTime;
     private int calibratedBPM;
     private boolean isRunning;
+    private boolean calibrating = false;
 
     TextView TvSteps;
     TextView tvBPM;
@@ -30,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final Handler handler = new Handler();
 
 
         // Get an instance of the SensorManager
@@ -40,45 +45,74 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         TvSteps = (TextView) findViewById(R.id.tv_steps);
         tvBPM = findViewById(R.id.bpm);
-        Button BtnStart = (Button) findViewById(R.id.btn_start);
-        Button BtnStop = (Button) findViewById(R.id.btn_stop);
+        //Button BtnStart = (Button) findViewById(R.id.btn_start);
+        //Button BtnStop = (Button) findViewById(R.id.btn_stop);
+        ImageButton calibrateBtn = (ImageButton) findViewById(R.id.calibrateBtn);
 
 
-
-
-        BtnStart.setOnClickListener(new View.OnClickListener() {
-
+        calibrateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-
-                numSteps = 0;
-                TvSteps.setText(TEXT_NUM_STEPS + numSteps);
-                startTime = SystemClock.elapsedRealtime();
-                sensorManager.registerListener(MainActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
-                isRunning = true;
-
-            }
-        });
-
-
-        BtnStop.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-
-                sensorManager.unregisterListener(MainActivity.this);
-                endTime = SystemClock.elapsedRealtime();
-                millisecondTime = endTime - startTime;
-                calibratedBPM = (int)(numSteps / ((double)millisecondTime / 60000));
-                if (isRunning) {
-                    tvBPM.setText("BPM" + calibratedBPM);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Start the pedometer first!", Toast.LENGTH_SHORT).show();
+                if (calibrating) {
+                    endTime = SystemClock.elapsedRealtime();
+                    calibrating = false;
+                    numSteps = 0;
+                    TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+                    sensorManager.unregisterListener(MainActivity.this);
                 }
-                isRunning = false;
+                else {
+                    calibrating = true;
+                    numSteps = 0;
+                    TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+                    startTime = SystemClock.elapsedRealtime();
+                    sensorManager.registerListener(MainActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
+
+                }
+
+               // TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+
+
+
 
             }
         });
+
+
+
+
+//        BtnStart.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View arg0) {
+//
+//                numSteps = 0;
+//                TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+//                startTime = SystemClock.elapsedRealtime();
+//                sensorManager.registerListener(MainActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
+//                isRunning = true;
+//
+//            }
+//        });
+
+//
+//        BtnStop.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View arg0) {
+//
+//                sensorManager.unregisterListener(MainActivity.this);
+//                endTime = SystemClock.elapsedRealtime();
+//                millisecondTime = endTime - startTime;
+//                calibratedBPM = (int)(numSteps / ((double)millisecondTime / 60000));
+//                if (isRunning) {
+//                    tvBPM.setText("BPM" + calibratedBPM);
+//                } else {
+//                    Toast.makeText(getApplicationContext(), "Start the pedometer first!", Toast.LENGTH_SHORT).show();
+//                }
+//                isRunning = false;
+//
+//            }
+//        });
 
 
 
@@ -101,8 +135,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void step(long timeNs) {
         numSteps++;
+        millisecondTime = SystemClock.elapsedRealtime() - startTime;
+        calibratedBPM = (int)(numSteps / ((double)millisecondTime / 60000));
+        //if (calibrating) tvBPM.setText("BPM:" + calibratedBPM );
+        //else Toast.makeText(getApplicationContext(), "Calibrating!", Toast.LENGTH_SHORT).show();
 
+        tvBPM.setText("BPM:" + calibratedBPM );
         TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+
     }
 
 }
