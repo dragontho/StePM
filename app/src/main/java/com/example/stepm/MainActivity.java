@@ -140,11 +140,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (calibrating) {
                     endTime = SystemClock.elapsedRealtime();
                     calibrating = false;
-                    numSteps = 0;
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
                     sensorManager.unregisterListener(MainActivity.this);
+                    openSongListActivity(calibratedBPM);
+                    numSteps = 0;
                 } else {
-                    openSongListActivity();
                     calibrating = true;
                     numSteps = 0;
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
@@ -186,8 +186,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    public void openSongListActivity() {
+    public void openSongListActivity(int BPM) {
         Intent intent = new Intent(this, SongListActivity.class);
+        intent.putExtra("BPM", BPM);
         startActivity(intent);
     }
 
