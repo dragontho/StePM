@@ -43,15 +43,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private boolean isRunning;
     private boolean calibrating = false;
     private ArrayList<BPMList> bpmList;
+    private ArrayList<BPMList> finalList;
     TextView TvSteps;
     TextView tvBPM;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bpmList = new ArrayList<BPMList>();
+        finalList = new ArrayList<BPMList>();
         getBPMList();
         final Handler handler = new Handler();
 
@@ -75,7 +78,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     numSteps = 0;
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
                     sensorManager.unregisterListener(MainActivity.this);
+
+                    for (int i = 0; i < bpmList.size(); i++) {
+
+                        if (Integer.parseInt(bpmList.get(i).BPM) >= calibratedBPM - 5  && Integer.parseInt(bpmList.get(i).BPM) <= calibratedBPM + 5) {
+                            Log.e("bpm ", bpmList.get(i).BPM);
+                            finalList.add(bpmList.get(i));
+                        }
+                    }
+
+
                     openSongListActivity(calibratedBPM);
+
                 } else {
                     calibrating = true;
                     numSteps = 0;
@@ -119,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void openSongListActivity(int BPM) {
         Intent intent = new Intent(this, SongListActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList("bpmSongs", bpmList);
+        bundle.putParcelableArrayList("bpmSongs", finalList);
         bundle.putInt("calibratedBPM", calibratedBPM);
         intent.putExtra("bundle", bundle);
         startActivity(intent);
@@ -128,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void getBPMList() {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
+
         ContentResolver musicResolver = getContentResolver();
         Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
@@ -146,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 final String thisArtist = musicCursor.getString(artistColumn);
                 JsonObjectRequest objectRequest = new JsonObjectRequest(
                         Request.Method.GET,
-                        "https://api.getsongbpm.com/search/?api_key=0b91c723ea7ebd2e272d1aedbef7f5cd&type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
+                        "https://api.getsongbpm.com/search/?api_key=ca6432926fb5a35c17fa22ee91dcd2c0&type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
                         null,
                         new Response.Listener<JSONObject>() {
                             @Override
@@ -156,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                     Log.e(thisTitle + "-" + thisArtist, response.toString());
                                     Gson gson = new Gson();
                                     SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
+
                                     if (songBPM.search[0].tempo != null) {
                                         bpmList.add(new BPMList(thisId, thisTitle, thisArtist, songBPM.search[0].tempo));
                                         Log.e("test", bpmList.get(bpmList.size()-1).BPM);

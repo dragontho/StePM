@@ -51,7 +51,7 @@ public class SongAdapter extends BaseAdapter {
         //get song using position
         BPMList currSong = songs.get(arg0);
         //get title and artist strings
-        songView.setText(currSong.getTitle());
+        songView.setText(currSong.getTitle() + " (" + currSong.getBPM() + ")");
         artistView.setText(currSong.getArtist());
         //set position as tag
         songLay.setTag(arg0);

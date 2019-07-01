@@ -45,6 +45,12 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_list);
 
+        received = getIntent().getBundleExtra("bundle");
+
+        bpmList = received.getParcelableArrayList("bpmSongs");
+        calibratedBPM = received.getInt("calibratedBPM");
+
+
         //setController();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -59,10 +65,7 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
                 return;
             }}
         songView = (ListView)findViewById(R.id.song_list);
-        received = getIntent().getBundleExtra("bundle");
 
-        bpmList = received.getParcelableArrayList("bpmSongs");
-        calibratedBPM = received.getInt("calibratedBPM");
 //        Log.e("testing", bpmList.get(0).BPM);
 
 
@@ -74,11 +77,7 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
         });
 
 
-        for (int i = 0; i < bpmList.size(); i++) {
-            if (Integer.parseInt(bpmList.get(i).BPM) < calibratedBPM - 10 || Integer.parseInt(bpmList.get(i).BPM) > calibratedBPM + 10) {
-                bpmList.remove(bpmList.get(i));
-            }
-        }
+
 //        for (BPMList entry: bpmList) {
 //            if (Integer.parseInt(entry.BPM) < calibratedBPM - 2 || Integer.parseInt(entry.BPM) > calibratedBPM + 2) {
 //                bpmList.remove(entry);
@@ -99,6 +98,7 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
             //get service
             musicSrv = binder.getService();
             //pass list
+
             musicSrv.setList(bpmList);
             musicBound = true;
         }
