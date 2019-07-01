@@ -1,9 +1,9 @@
 package com.example.stepm;
 
 public class SongList {
-    private long id;
-    private String title;
-    private String artist;
+    protected long id;
+    protected String title;
+    protected String artist;
 
     public SongList(long id, String title, String artist) {
         this.id = id;

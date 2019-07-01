@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         String IDURL = "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f&type=song&lookup=bad+guy";
+        bpmList = new ArrayList<BPMList>();
         getBPMList();
 
 //        JsonObjectRequest objectRequest1 = new JsonObjectRequest(
@@ -199,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void openSongListActivity(int BPM) {
         Intent intent = new Intent(this, SongListActivity.class);
-        intent.putExtra("BPM", BPM);
+        Bundle bundle = new Bundle();
         startActivity(intent);
     }
 
@@ -218,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     (android.provider.MediaStore.Audio.Media.ARTIST);
             //add songs to list
             do {
-                long thisId = musicCursor.getLong(idColumn);
+                final long thisId = musicCursor.getLong(idColumn);
                 final String thisTitle = musicCursor.getString(titleColumn);
                 final String thisArtist = musicCursor.getString(artistColumn);
                 JsonObjectRequest objectRequest = new JsonObjectRequest(
@@ -228,14 +229,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-                                Log.e(thisTitle + "-" + thisArtist, response.toString());
                                 //TvSteps.setText(response.toString());
-                                Gson gson = new Gson();
-                                //SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
-                                //tvBPM.setText(songBPM.search[0].tempo);
-                                //bpmList.add(new BPMList(thisTitle, thisArtist, songBPM.search[0].tempo));
-                                //Log.e("test", bpmList.get(bpmList.size()-1).BPM);
-
+                                if (!response.toString().equals("{\"search\":{\"error\":\"no result\"}}")) {
+                                    Log.e(thisTitle + "-" + thisArtist, response.toString());
+                                    Gson gson = new Gson();
+                                    SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
+                                    tvBPM.setText(songBPM.search[0].tempo);
+                                    if (songBPM.search[0].tempo != null) {
+                                        bpmList.add(new BPMList(thisId, thisTitle, thisArtist, songBPM.search[0].tempo));
+                                        Log.e("test", bpmList.get(bpmList.size()-1).BPM);
+                                    }
+                                }
                             }
                         },
                         new Response.ErrorListener() {
