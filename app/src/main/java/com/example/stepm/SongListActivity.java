@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -24,6 +25,8 @@ import com.example.stepm.SongList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class SongListActivity extends AppCompatActivity /*implements MediaPlayerControl*/{
     private ArrayList<SongList> songList;
@@ -32,28 +35,9 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
     private Intent playIntent;
     private boolean musicBound=false;
     private ArrayList<BPMList> bpmList;
-    //private MusicController controller;
+    private int calibratedBPM;
+    private Bundle received;
 
-//    private void setController(){
-//        //set the controller up
-//        controller = new MusicController(this);
-//        controller.setPrevNextListeners(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                playNext();
-//            }
-//        }, new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                playPrev();
-//            }
-//        });
-//
-//        controller.setMediaPlayer(this);
-//        controller.setAnchorView(findViewById(R.id.song_list));
-//        controller.setEnabled(true);
-//
-//    }
 
 
     @Override
@@ -75,17 +59,31 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
                 return;
             }}
         songView = (ListView)findViewById(R.id.song_list);
-        bpmList = new ArrayList<BPMList>();
+        received = getIntent().getBundleExtra("bundle");
 
-        Intent intent = getIntent();
-        getSongList();
-        // getBPMList();
+        bpmList = received.getParcelableArrayList("bpmSongs");
+        calibratedBPM = received.getInt("calibratedBPM");
+//        Log.e("testing", bpmList.get(0).BPM);
+
+
 
         Collections.sort(bpmList, new Comparator<BPMList>(){
             public int compare(BPMList a, BPMList b){
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
+
+
+        for (int i = 0; i < bpmList.size(); i++) {
+            if (Integer.parseInt(bpmList.get(i).BPM) < calibratedBPM - 10 || Integer.parseInt(bpmList.get(i).BPM) > calibratedBPM + 10) {
+                bpmList.remove(bpmList.get(i));
+            }
+        }
+//        for (BPMList entry: bpmList) {
+//            if (Integer.parseInt(entry.BPM) < calibratedBPM - 2 || Integer.parseInt(entry.BPM) > calibratedBPM + 2) {
+//                bpmList.remove(entry);
+//            }
+//        }
 
         SongAdapter songAdt = new SongAdapter(this, bpmList);
         songView.setAdapter(songAdt);
@@ -101,7 +99,7 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
             //get service
             musicSrv = binder.getService();
             //pass list
-            musicSrv.setList(songList);
+            musicSrv.setList(bpmList);
             musicBound = true;
         }
 
@@ -110,35 +108,6 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
             musicBound = false;
         }
     };
-
-    public void getSongList() {
-        ContentResolver musicResolver = getContentResolver();
-        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
-        if(musicCursor!=null && musicCursor.moveToFirst()){
-            //get columns
-            int titleColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.TITLE);
-            int idColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media._ID);
-            int artistColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.ARTIST);
-            //add songs to list
-            do {
-                long thisId = musicCursor.getLong(idColumn);
-                String thisTitle = musicCursor.getString(titleColumn);
-                String thisArtist = musicCursor.getString(artistColumn);
-                songList.add(new SongList(thisId, thisTitle, thisArtist));
-            }
-            while (musicCursor.moveToNext());
-        }
-        //retrieve song info
-    }
-
-
-
-
-
 
 
     @Override
@@ -179,61 +148,6 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
         super.onDestroy();
     }
 
-
-//    @Override
-//    public void start() {
-//
-//    }
-//
-//    @Override
-//    public void pause() {
-//
-//    }
-//
-//    @Override
-//    public int getDuration() {
-//        return 0;
-//    }
-//
-//    @Override
-//    public int getCurrentPosition() {
-//        return 0;
-//    }
-//
-//    @Override
-//    public void seekTo(int pos) {
-//
-//    }
-//
-//    @Override
-//    public boolean isPlaying() {
-//        return false;
-//    }
-//
-//    @Override
-//    public int getBufferPercentage() {
-//        return 0;
-//    }
-//
-//    @Override
-//    public boolean canPause() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean canSeekBackward() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean canSeekForward() {
-//        return false;
-//    }
-//
-//    @Override
-//    public int getAudioSessionId() {
-//        return 0;
-//    }
 
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {

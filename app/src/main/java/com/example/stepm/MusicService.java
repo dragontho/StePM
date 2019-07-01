@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentUris;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -18,7 +20,7 @@ public class MusicService extends android.app.Service implements
     //media player
     private MediaPlayer player;
     //song list
-    private ArrayList<SongList> songs;
+    private ArrayList<BPMList> songs;
     //current position
     private int songPosn;
 
@@ -45,7 +47,7 @@ public class MusicService extends android.app.Service implements
         player.setOnErrorListener(this);
     }
 
-    public void setList(ArrayList<SongList> theSongs){
+    public void setList(ArrayList<BPMList> theSongs){
         songs=theSongs;
     }
 
@@ -82,7 +84,7 @@ public class MusicService extends android.app.Service implements
         //play a song
         player.reset();
         //get song
-        SongList playSong = songs.get(songPosn);
+        BPMList playSong = songs.get(songPosn);
 //get id
         long currSong = playSong.getId();
 //set uri

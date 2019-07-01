@@ -42,94 +42,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int calibratedBPM;
     private boolean isRunning;
     private boolean calibrating = false;
-
     private ArrayList<BPMList> bpmList;
-
-
     TextView TvSteps;
     TextView tvBPM;
-
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        String IDURL = "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f&type=song&lookup=bad+guy";
         bpmList = new ArrayList<BPMList>();
         getBPMList();
-
-//        JsonObjectRequest objectRequest1 = new JsonObjectRequest(
-//                Request.Method.GET,
-//                IDURL,
-//                null,
-//                new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                      //  Log.e("Rest Response", response.toString());
-////                        TvSteps.setText(response.toString());
-////                        Gson gson = new Gson();
-////                        SongID songID = gson.fromJson(response.toString(), SongID.class);
-////                      //  Log.e("Java", SongID.search.toString());
-//
-//
-//                    }
-//                },
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.e("Rest Response", error.toString());
-//                    }
-//                }
-//
-//        );
-
-
-//        String BPMURL =  "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f&type=both&lookup=song:enter+sandmanartist:metallica";
-//        RequestQueue requestQueue = Volley.newRequestQueue(this);
-//        JsonObjectRequest objectRequest = new JsonObjectRequest(
-//                Request.Method.GET,
-//                BPMURL,
-//                null,
-//                new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        Log.e("Rest Response", response.toString());
-//                        TvSteps.setText(response.toString());
-//                        Gson gson = new Gson();
-//                        SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
-//                        tvBPM.setText(songBPM.search[0].tempo);
-//
-//                    }
-//                },
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.e("Rest Response", error.toString());
-//                    }
-//                }
-//
-//        );
-
-        //  RequestQueue requestQueue1 = Volley.newRequestQueue(this);
-
-        //requestQueue1.add(objectRequest1);
-
-        // requestQueue.add(objectRequest1);
-     //   requestQueue.add(objectRequest);
-
-
         final Handler handler = new Handler();
-
-//        public void sendMessage (View view){
-//            Intent intent = new Intent(this, SongListActivity.class);
-//            EditText editText = (EditText) findViewById(R.id.editText);
-//            String message = editText.getText().toString();
-//            intent.putExtra(EXTRA_MESSAGE, message);
-//            startActivity(intent);
-//        }
-
 
         // Get an instance of the SensorManager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -139,10 +63,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         TvSteps = (TextView) findViewById(R.id.tv_steps);
         tvBPM = findViewById(R.id.bpm);
-        //Button BtnStart = (Button) findViewById(R.id.btn_start);
-        //Button BtnStop = (Button) findViewById(R.id.btn_stop);
-        ImageButton calibrateBtn = (ImageButton) findViewById(R.id.calibrateBtn);
 
+        ImageButton calibrateBtn = (ImageButton) findViewById(R.id.calibrateBtn);
 
         calibrateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     numSteps = 0;
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
                     sensorManager.unregisterListener(MainActivity.this);
-                } else {
                     openSongListActivity(calibratedBPM);
+                } else {
                     calibrating = true;
                     numSteps = 0;
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
@@ -167,9 +89,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-
     }
-
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -199,7 +119,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void openSongListActivity(int BPM) {
         Intent intent = new Intent(this, SongListActivity.class);
         Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("bpmSongs", bpmList);
+        bundle.putInt("calibratedBPM", calibratedBPM);
+        intent.putExtra("bundle", bundle);
         startActivity(intent);
+
     }
 
     private void getBPMList() {
@@ -228,11 +152,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             @Override
                             public void onResponse(JSONObject response) {
                                 //TvSteps.setText(response.toString());
-                                if (!response.toString().equals("{\"search\":{\"error\":\"no result\"}}")) {
+                                if (!response.toString().equals("{\"search\":{\"error\":\"no result\"}}" )) {
                                     Log.e(thisTitle + "-" + thisArtist, response.toString());
                                     Gson gson = new Gson();
                                     SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
-                                    tvBPM.setText(songBPM.search[0].tempo);
                                     if (songBPM.search[0].tempo != null) {
                                         bpmList.add(new BPMList(thisId, thisTitle, thisArtist, songBPM.search[0].tempo));
                                         Log.e("test", bpmList.get(bpmList.size()-1).BPM);
