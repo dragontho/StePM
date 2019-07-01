@@ -1,6 +1,5 @@
 package com.example.stepm;
 
-import android.app.VoiceInteractor;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
@@ -15,7 +14,6 @@ import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -25,13 +23,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.stepm.StepDetector;
+import com.example.stepm.StepListener;
 import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, StepListener {
     private TextView textView;
@@ -88,38 +86,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //        );
 
 
-        String BPMURL =  "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f&type=both&lookup=song:enter+sandmanartist:metallica";
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest objectRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                BPMURL,
-                null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.e("Rest Response", response.toString());
-                        TvSteps.setText(response.toString());
-                        Gson gson = new Gson();
-                        SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
-                        tvBPM.setText(songBPM.search[0].tempo);
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("Rest Response", error.toString());
-                    }
-                }
-
-        );
+//        String BPMURL =  "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f&type=both&lookup=song:enter+sandmanartist:metallica";
+//        RequestQueue requestQueue = Volley.newRequestQueue(this);
+//        JsonObjectRequest objectRequest = new JsonObjectRequest(
+//                Request.Method.GET,
+//                BPMURL,
+//                null,
+//                new Response.Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        Log.e("Rest Response", response.toString());
+//                        TvSteps.setText(response.toString());
+//                        Gson gson = new Gson();
+//                        SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
+//                        tvBPM.setText(songBPM.search[0].tempo);
+//
+//                    }
+//                },
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Log.e("Rest Response", error.toString());
+//                    }
+//                }
+//
+//        );
 
         //  RequestQueue requestQueue1 = Volley.newRequestQueue(this);
 
         //requestQueue1.add(objectRequest1);
 
-       // requestQueue.add(objectRequest1);
-        requestQueue.add(objectRequest);
+        // requestQueue.add(objectRequest1);
+     //   requestQueue.add(objectRequest);
 
 
         final Handler handler = new Handler();
@@ -224,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 final String thisArtist = musicCursor.getString(artistColumn);
                 JsonObjectRequest objectRequest = new JsonObjectRequest(
                         Request.Method.GET,
-                        "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f&type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
+                        "https://api.getsongbpm.com/search/?api_key=0b91c723ea7ebd2e272d1aedbef7f5cd&type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
                         null,
                         new Response.Listener<JSONObject>() {
                             @Override

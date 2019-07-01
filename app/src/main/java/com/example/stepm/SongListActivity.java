@@ -1,41 +1,29 @@
 package com.example.stepm;
 
 import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import android.net.Uri;
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.util.Log;
-import android.widget.ListView;
-import android.os.IBinder;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.example.stepm.MusicService;
 import com.example.stepm.MusicService.MusicBinder;
-import com.google.gson.Gson;
+import com.example.stepm.SongList;
 
-import android.widget.MediaController.MediaPlayerControl;
-
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class SongListActivity extends AppCompatActivity /*implements MediaPlayerControl*/{
     private ArrayList<SongList> songList;
@@ -91,10 +79,10 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
 
         Intent intent = getIntent();
         getSongList();
-       // getBPMList();
+        // getBPMList();
 
-        Collections.sort(bpmList, new Comparator<SongList>(){
-            public int compare(SongList a, SongList b){
+        Collections.sort(bpmList, new Comparator<BPMList>(){
+            public int compare(BPMList a, BPMList b){
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
