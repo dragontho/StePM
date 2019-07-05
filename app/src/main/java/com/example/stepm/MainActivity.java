@@ -2,6 +2,7 @@ package com.example.stepm;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -26,9 +27,11 @@ import com.android.volley.toolbox.Volley;
 import com.example.stepm.StepDetector;
 import com.example.stepm.StepListener;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, StepListener {
@@ -55,7 +58,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         bpmList = new ArrayList<BPMList>();
         finalList = new ArrayList<BPMList>();
-        getBPMList();
+        loadData();
+        if (bpmList.size() == 0) getBPMList();
         final Handler handler = new Handler();
 
         // Get an instance of the SensorManager
@@ -136,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         bundle.putParcelableArrayList("bpmSongs", finalList);
         bundle.putInt("calibratedBPM", calibratedBPM);
         intent.putExtra("bundle", bundle);
+        saveData();
         startActivity(intent);
 
     }
@@ -161,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 final String thisArtist = musicCursor.getString(artistColumn);
                 JsonObjectRequest objectRequest = new JsonObjectRequest(
                         Request.Method.GET,
-                        "https://api.getsongbpm.com/search/?api_key=ca6432926fb5a35c17fa22ee91dcd2c0&type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
+                        "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f &type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
                         null,
                         new Response.Listener<JSONObject>() {
                             @Override
@@ -194,6 +199,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             while (musicCursor.moveToNext());
         }
         //retrieve song info
+    }
+
+    private void saveData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(bpmList);
+        editor.putString("bpm list", json);
+        editor.apply();
+    }
+
+    private void loadData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("bpm list", null);
+        Type type = new TypeToken<ArrayList<BPMList>>() {}.getType();
+        bpmList = gson.fromJson(json, type);
+
+        if (bpmList == null) {
+            bpmList = new ArrayList<>();
+        }
     }
 
 
