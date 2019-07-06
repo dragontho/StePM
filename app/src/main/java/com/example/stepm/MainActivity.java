@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,10 +13,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -47,19 +50,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private boolean calibrating = false;
     private ArrayList<BPMList> bpmList;
     private ArrayList<BPMList> finalList;
+    private int numOfSongs = 0;
     TextView TvSteps;
     TextView tvBPM;
+    ConstraintLayout layout;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bpmList = new ArrayList<BPMList>();
-        finalList = new ArrayList<BPMList>();
-        loadData();
-        if (bpmList.size() == 0) getBPMList();
+        //bpmList = new ArrayList<BPMList>();
+        layout = findViewById(R.id.constraintLayout);
+        layout.setBackgroundColor(Color.rgb( 179, 229, 252));
+
+
+//        loadData();
+        if (loadData() != getNumOfSongs() || bpmList.size() == 0) getBPMList();
         final Handler handler = new Handler();
 
         // Get an instance of the SensorManager
@@ -82,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     numSteps = 0;
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
                     sensorManager.unregisterListener(MainActivity.this);
-
+                    finalList = new ArrayList<BPMList>();
                     for (int i = 0; i < bpmList.size(); i++) {
 
                         if (Integer.parseInt(bpmList.get(i).BPM) >= calibratedBPM - 5  && Integer.parseInt(bpmList.get(i).BPM) <= calibratedBPM + 5) {
@@ -145,8 +154,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    private int getNumOfSongs() {
+        numOfSongs = 0;
+        ContentResolver musicResolver = getContentResolver();
+        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
+
+        while (musicCursor.moveToNext()) numOfSongs++;
+        Log.e("songs", numOfSongs + "");
+        return numOfSongs;
+    }
+
     private void getBPMList() {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+
 
         ContentResolver musicResolver = getContentResolver();
         Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
@@ -207,10 +232,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Gson gson = new Gson();
         String json = gson.toJson(bpmList);
         editor.putString("bpm list", json);
+        editor.putInt("num of songs",getNumOfSongs());
         editor.apply();
     }
 
-    private void loadData() {
+    private int loadData() {
         SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString("bpm list", null);
@@ -220,6 +246,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (bpmList == null) {
             bpmList = new ArrayList<>();
         }
+       // Log.e(sharedPreferences.getInt("num of songs",0));
+        return sharedPreferences.getInt("num of songs",0);
+
     }
 
 

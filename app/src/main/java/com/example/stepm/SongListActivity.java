@@ -38,7 +38,7 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
     private ArrayList<BPMList> bpmList;
     private int calibratedBPM;
     private Bundle received;
-    
+
 
 
 
