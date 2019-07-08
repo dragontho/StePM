@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView TvSteps;
     TextView tvBPM;
     ConstraintLayout layout;
-    private static final String NOTIF_CHANNEL = "notifChannel1";
-    private static final int NOTIF_ID = 1;
 
 
     @Override
@@ -73,11 +71,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //bpmList = new ArrayList<BPMList>();
         layout = findViewById(R.id.constraintLayout);
         layout.setBackgroundColor(Color.rgb( 179, 229, 252));
-        createNotificationChannel();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-// notificationId is a unique int for each notification that you must define
-        notificationManager.notify(NOTIF_ID, builder.build());
+
 
 
 
@@ -265,30 +260,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-//    Intent notifIntent = new Intent(this, MainActivity.class);
-//    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notifIntent, 0);
 
-
-    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIF_CHANNEL)
-            .setSmallIcon(R.drawable.icons8_download_24)
-            .setContentTitle("Getting your BPMs")
-            .setContentText("Downloading from database...")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//            .setContentIntent(pendingIntent)
-            .setAutoCancel(true);
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL, "Notif Channel", importance);
-            channel.setDescription("To display loading");
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
 
 }
