@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -40,10 +41,14 @@ public class SongListActivity extends AppCompatActivity /*implements MediaPlayer
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_list);
+
+        //SharedPreferences settings = getSharedPreferences(PREFS_NAME,0);
+        //bpmList = settings.ge
 
         received = getIntent().getBundleExtra("bundle");
 
