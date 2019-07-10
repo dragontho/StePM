@@ -54,9 +54,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int calibratedBPM;
     private boolean isRunning;
     private boolean calibrating = false;
-    private ArrayList<BPMList> bpmList;
     private ArrayList<BPMList> finalList;
-    private int numOfSongs = 0;
     TextView TvSteps;
     TextView tvBPM;
     ConstraintLayout layout;
@@ -77,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
 //        loadData();
-        if (loadData() != getNumOfSongs() || bpmList.size() == 0) getBPMList();
         final Handler handler = new Handler();
 
         // Get an instance of the SensorManager
@@ -101,11 +98,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     TvSteps.setText(TEXT_NUM_STEPS + numSteps);
                     sensorManager.unregisterListener(MainActivity.this);
                     finalList = new ArrayList<BPMList>();
-                    for (int i = 0; i < bpmList.size(); i++) {
+                    for (int i = 0; i < App.bpmList.size(); i++) {
 
-                        if (Integer.parseInt(bpmList.get(i).BPM) >= calibratedBPM - 5  && Integer.parseInt(bpmList.get(i).BPM) <= calibratedBPM + 5) {
-                            Log.e("bpm ", bpmList.get(i).BPM);
-                            finalList.add(bpmList.get(i));
+                        if (Integer.parseInt(App.bpmList.get(i).BPM) >= calibratedBPM - 5  && Integer.parseInt(App.bpmList.get(i).BPM) <= calibratedBPM + 5) {
+                            Log.e("bpm ", App.bpmList.get(i).BPM);
+                            finalList.add(App.bpmList.get(i));
                         }
                     }
 
@@ -158,107 +155,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         bundle.putParcelableArrayList("bpmSongs", finalList);
         bundle.putInt("calibratedBPM", calibratedBPM);
         intent.putExtra("bundle", bundle);
-        saveData();
+//        saveData();
         startActivity(intent);
 
     }
 
-    private int getNumOfSongs() {
-        numOfSongs = 0;
-        ContentResolver musicResolver = getContentResolver();
-        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
-
-        while (musicCursor.moveToNext()) numOfSongs++;
-        Log.e("songs", numOfSongs + "");
-        return numOfSongs;
-    }
-
-    private void getBPMList() {
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-
-
-        ContentResolver musicResolver = getContentResolver();
-        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
-        if(musicCursor!=null && musicCursor.moveToFirst()){
-            //get columns
-            int titleColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.TITLE);
-            int idColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media._ID);
-            int artistColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.ARTIST);
-            //add songs to list
-            do {
-                final long thisId = musicCursor.getLong(idColumn);
-                final String thisTitle = musicCursor.getString(titleColumn);
-                final String thisArtist = musicCursor.getString(artistColumn);
-                JsonObjectRequest objectRequest = new JsonObjectRequest(
-                        Request.Method.GET,
-                        "https://api.getsongbpm.com/search/?api_key=8ece8c1663797a5f4dde5a95d171543f &type=both&lookup=song:" + thisTitle.toLowerCase().replace(" " ,"+") + "artist:" + thisArtist.toLowerCase().replace(" " ,"+"),
-                        null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                //TvSteps.setText(response.toString());
-                                if (!response.toString().equals("{\"search\":{\"error\":\"no result\"}}" )) {
-                                    Log.e(thisTitle + "-" + thisArtist, response.toString());
-                                    Gson gson = new Gson();
-                                    SongBPM songBPM = gson.fromJson(response.toString(), SongBPM.class);
-
-                                    if (songBPM.search[0].tempo != null) {
-                                        bpmList.add(new BPMList(thisId, thisTitle, thisArtist, songBPM.search[0].tempo));
-                                        Log.e("test", bpmList.get(bpmList.size()-1).BPM);
-                                    }
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.e("Rest Response", error.toString());
-                            }
-                        }
-
-
-                );
-                requestQueue.add(objectRequest);
-
-            }
-            while (musicCursor.moveToNext());
-        }
-        //retrieve song info
-    }
-
-    private void saveData() {
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(bpmList);
-        editor.putString("bpm list", json);
-        editor.putInt("num of songs",getNumOfSongs());
-        editor.apply();
-    }
-
-    private int loadData() {
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("bpm list", null);
-        Type type = new TypeToken<ArrayList<BPMList>>() {}.getType();
-        bpmList = gson.fromJson(json, type);
-
-        if (bpmList == null) {
-            bpmList = new ArrayList<>();
-        }
-       // Log.e(sharedPreferences.getInt("num of songs",0));
-        return sharedPreferences.getInt("num of songs",0);
-
-    }
 
 
 
