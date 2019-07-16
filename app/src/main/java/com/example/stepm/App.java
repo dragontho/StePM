@@ -53,7 +53,7 @@ public class App extends Application {
             .setContentText("Downloading from database...")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
-            .setProgress(totalSongs, 0, false)
+            .setProgress(0,0,true)
             .setOnlyAlertOnce(true)
             .setOngoing(true);
 
@@ -67,9 +67,7 @@ public class App extends Application {
             @Override
             public void run() {
                 SystemClock.sleep(2000);
-                while (intermediateProgress < 1000) {
-                    builder.setProgress(totalSongs, intermediateProgress, false);
-                    notificationManager.notify(NOTIF_ID, builder.build());
+                while (intermediateProgress < totalSongs) {
                 }
                 builder.setContentText("Finished getting BPMs")
                        .setProgress(0, 0, false)
